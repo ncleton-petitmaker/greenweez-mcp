@@ -1,0 +1,36 @@
+name: Rapport de bug
+description: Signaler un comportement reproductible, sans donnée de compte.
+title: "bug: "
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        N’ajoutez jamais de mot de passe, cookie, jeton, adresse, panier, commande ou capture de compte.
+  - type: input
+    id: version
+    attributes:
+      label: Version de Greenweez MCP
+      placeholder: v0.2.0
+    validations:
+      required: true
+  - type: dropdown
+    id: client
+    attributes:
+      label: Client MCP
+      options: [Codex, Claude Code, Autre client MCP]
+    validations:
+      required: true
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Étapes de reproduction
+      placeholder: Décrivez uniquement des étapes et sorties expurgées.
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Comportement attendu et observé
+    validations:
+      required: true

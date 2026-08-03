@@ -1,0 +1,27 @@
+node_modules/
+*.tgz
+.DS_Store
+.npm/
+release/
+
+# Autres projets et outils du workspace MCP Creator.
+/ovs-mcp/
+/skills/
+
+# Contrats et scripts d’observation privés, jamais publiés.
+maintenance/
+src/observation/
+dist/observation/
+dist/tests/
+
+# Sessions, confirmations et secrets locaux.
+.env
+.env.*
+*.key
+*.lock
+pending-confirmations.*.json
+greenweez-session*.enc.json
+
+# Claude Code local/machine-specific files.
+CLAUDE.local.md
+.claude/settings.local.json

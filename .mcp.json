@@ -1,0 +1,12 @@
+{
+  "mcpServers": {
+    "greenweez": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "--package=github:ncleton-petitmaker/greenweez-mcp#v0.2.0",
+        "greenweez-mcp"
+      ]
+    }
+  }
+}
