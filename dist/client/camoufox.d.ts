@@ -1,8 +1,9 @@
+import type { GreenweezOnboardingGateway } from "./onboarding.js";
 export interface BrowserGateway {
     read(url: URL, expression: string): Promise<unknown>;
     mutate(url: URL, expression: string): Promise<unknown>;
 }
-export declare class CamoufoxGateway implements BrowserGateway {
+export declare class CamoufoxGateway implements BrowserGateway, GreenweezOnboardingGateway {
     private readonly origin;
     private readonly apiKey;
     private readonly userId;
@@ -21,6 +22,9 @@ export declare class CamoufoxGateway implements BrowserGateway {
     loginAndExportSession(timeoutMs?: number): Promise<{
         connected: true;
         exported: true;
+    }>;
+    openAccountCreation(): Promise<{
+        opened: true;
     }>;
     importSession(): Promise<{
         imported: true;

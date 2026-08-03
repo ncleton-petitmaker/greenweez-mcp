@@ -128,6 +128,11 @@ export class CamoufoxGateway {
             await this.close(tabId);
         }
     }
+    async openAccountCreation() {
+        await this.importPortableSessionIfPresent();
+        await this.open(new URL("https://www.greenweez.com/inscription"));
+        return { opened: true };
+    }
     async importSession() {
         const cookies = readEncryptedSessionBundle(this.environment);
         const tabId = await this.open(new URL("https://www.greenweez.com/"));

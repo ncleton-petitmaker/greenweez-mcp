@@ -8,6 +8,7 @@ import { CamoufoxGateway } from "../client/camoufox.js";
 import { GreenweezClient } from "../client/greenweez.js";
 import { GreenweezError } from "../client/errors.js";
 import { ConfirmationStore } from "../client/confirmation-store.js";
+import { GreenweezOnboarding } from "../client/onboarding.js";
 function result(value) {
     return { content: [{ type: "text", text: JSON.stringify(value, null, 2) }], structuredContent: value };
 }
@@ -15,9 +16,37 @@ function error(error) {
     const known = error instanceof GreenweezError ? error : new GreenweezError("Erreur interne du connecteur.", "internal_error", "Consultez les diagnostics locaux puis réessayez.");
     return { isError: true, content: [{ type: "text", text: JSON.stringify({ error: { code: known.code, message: known.message, remediation: known.remediation } }, null, 2) }] };
 }
-export function createServer(browser = new CamoufoxGateway(), confirmations = new ConfirmationStore()) {
+function canOnboard(browser) {
+    return "sessionStatus" in browser && typeof browser.sessionStatus === "function" && "loginAndExportSession" in browser && typeof browser.loginAndExportSession === "function" && "openAccountCreation" in browser && typeof browser.openAccountCreation === "function";
+}
+export function createServer(browser = new CamoufoxGateway(), confirmations = new ConfirmationStore(), onboarding = canOnboard(browser) ? new GreenweezOnboarding(browser) : undefined) {
     const client = new GreenweezClient(browser, confirmations);
-    const server = new McpServer({ name: "greenweez-mcp", version: "0.2.0" });
+    const server = new McpServer({ name: "greenweez-mcp", version: "0.2.1" }, {
+        instructions: "Pour toute action nécessitant un compte Greenweez, appelez d’abord connect_greenweez. Cet outil retourne un wizard local avec deux liens directs : connexion à un compte existant et création officielle de compte. Ne demandez jamais de mot de passe, code 2FA, cookie ou jeton dans la conversation.",
+    });
+    server.registerPrompt("onboard_greenweez", {
+        title: "Connecter ou créer un compte Greenweez",
+        description: "Démarre le wizard local Greenweez avant toute action de panier ou de compte.",
+    }, async () => ({
+        messages: [{ role: "user", content: { type: "text", text: "Utilise l’outil connect_greenweez et présente directement les deux liens du wizard : connexion à un compte existant ou création officielle de compte. Ne demande aucun identifiant dans cette conversation." } }],
+    }));
+    server.registerTool("connect_greenweez", {
+        title: "Connecter ou créer un compte Greenweez",
+        description: "Retourne un wizard local avec deux liens directs : connexion à un compte existant ou création officielle de compte. Les identifiants restent sur Greenweez.",
+        inputSchema: {},
+        annotations: { readOnlyHint: false, destructiveHint: false, openWorldHint: true, idempotentHint: true },
+    }, async () => {
+        try {
+            if (!onboarding)
+                throw new GreenweezError("Le navigateur Greenweez ne prend pas en charge le wizard local.", "configuration_error", "Démarrez le serveur avec le connecteur Camofox Greenweez standard, puis relancez connect_greenweez.");
+            return result(await onboarding.begin());
+        }
+        catch (cause) {
+            return error(cause);
+        }
+    });
+    server.server.onclose = () => { if (onboarding)
+        void onboarding.close().catch(() => undefined); };
     server.registerTool("search_products", {
         title: "Rechercher des produits Greenweez",
         description: "Recherche publique dans le catalogue Greenweez et retourne une page de produits avec les prix observés.",

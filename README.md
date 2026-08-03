@@ -37,7 +37,7 @@ Prérequis : Node.js 22.12 ou supérieur, ainsi qu’un service Camofox local su
       "command": "npx",
       "args": [
         "-y",
-        "--package=github:ncleton-petitmaker/greenweez-mcp#v0.2.0",
+        "--package=github:ncleton-petitmaker/greenweez-mcp#v0.2.1",
         "greenweez-mcp"
       ]
     }
@@ -46,6 +46,15 @@ Prérequis : Node.js 22.12 ou supérieur, ainsi qu’un service Camofox local su
 ```
 
 Le processus MCP hérite de `GREENWEEZ_CAMOFOX_API_KEY`, `GREENWEEZ_CAMOFOX_URL` et, si utilisé, `GREENWEEZ_SESSION_DIRECTORY` depuis le gestionnaire de secrets de votre système. Ne mettez jamais leurs valeurs dans Git ou dans une conversation.
+
+## Premier démarrage : wizard de connexion
+
+Le serveur fournit le prompt `onboard_greenweez` et l’outil `connect_greenweez`. Lorsqu’un client MCP l’appelle, il retourne immédiatement un wizard local avec deux liens directs :
+
+- **J’ai un compte — me connecter** : ouvre Greenweez dans le navigateur local du connecteur et attend une session vérifiée.
+- **Créer un compte Greenweez** : ouvre la page officielle d’inscription, puis permet de revenir à la connexion.
+
+Les clients MCP ne possèdent pas de mécanisme universel pour ouvrir automatiquement une page au simple ajout d’un serveur. Codex et Claude Code reçoivent l’instruction d’appeler cet outil avant une action de compte ; si votre client ne l’affiche pas de lui-même, demandez simplement « Connecte Greenweez ». Le mot de passe et le 2FA restent exclusivement dans Greenweez.
 
 ## Prérequis
 
@@ -86,6 +95,7 @@ Pour plusieurs comptes Greenweez sur une même machine, attribuez à chacun un `
 
 ## Outils
 
+- `connect_greenweez()` : vérifie la session ou retourne le wizard local et les liens officiels de connexion et de création de compte.
 - `search_products(query, page?)` : recherche le catalogue public, 1 à 100.
 - `get_product(reference, slug)` : lit une fiche produit publique.
 - `get_cart()` : relit uniquement le résumé et les lignes du panier connecté.
@@ -99,8 +109,8 @@ Les confirmations sont aléatoires, à usage unique, valables deux minutes et co
 Le même client métier et le même gestionnaire de session sont disponibles en CLI :
 
 ```sh
-npx -y --package=github:ncleton-petitmaker/greenweez-mcp#v0.2.0 greenweez search "pâte à tartiner" 1
-npx -y --package=github:ncleton-petitmaker/greenweez-mcp#v0.2.0 greenweez cart get
+npx -y --package=github:ncleton-petitmaker/greenweez-mcp#v0.2.1 greenweez search "pâte à tartiner" 1
+npx -y --package=github:ncleton-petitmaker/greenweez-mcp#v0.2.1 greenweez cart get
 ```
 
 Le CLI et le serveur MCP utilisent exactement le même client métier et le même registre privé de confirmations. Le connecteur ne propose ni passage de commande, ni validation de livraison, ni paiement.

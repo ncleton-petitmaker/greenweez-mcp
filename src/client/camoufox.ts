@@ -1,5 +1,6 @@
 import { ConfigurationError, ConnectionError, ContractChangedError } from "./errors.js";
 import { readEncryptedSessionBundle, sessionBundleExists, writeEncryptedSessionBundle } from "./session-bundle.js";
+import type { GreenweezOnboardingGateway } from "./onboarding.js";
 
 export interface BrowserGateway {
   read(url: URL, expression: string): Promise<unknown>;
@@ -26,7 +27,7 @@ function requireLocalOrigin(value: string): URL {
   return url;
 }
 
-export class CamoufoxGateway implements BrowserGateway {
+export class CamoufoxGateway implements BrowserGateway, GreenweezOnboardingGateway {
   private readonly origin: URL;
   private readonly apiKey: string;
   private readonly userId: string;
@@ -125,6 +126,12 @@ export class CamoufoxGateway implements BrowserGateway {
       }
       throw new ConnectionError("La connexion Greenweez locale n’a pas été terminée dans le délai imparti.", "Relancez `greenweez session login` puis terminez la connexion dans la fenêtre locale, sans transmettre vos identifiants au MCP.");
     } finally { await this.close(tabId); }
+  }
+
+  async openAccountCreation(): Promise<{ opened: true }> {
+    await this.importPortableSessionIfPresent();
+    await this.open(new URL("https://www.greenweez.com/inscription"));
+    return { opened: true };
   }
 
   async importSession(): Promise<{ imported: true; connected: true }> {
