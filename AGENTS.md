@@ -14,7 +14,7 @@ Ce registre est le point d’entrée de cet agent pour les MCP de l’organisati
 | --- | --- | --- |
 | Greenweez MCP | [GitHub](https://github.com/ncleton-petitmaker/greenweez-mcp) · [checkout local](./README.md) | Serveur et CLI Greenweez ; publication GitHub sur `main`, releases par tags versionnés. |
 | Vegetal Food MCP | [checkout local](./vegetal-food-mcp/README.md) | Serveur et CLI pour le catalogue public Vegetal Food ; dépôt GitHub à créer avant publication. |
-| Leclerc Drive MCP | [GitHub](https://github.com/ncleton-petitmaker/leclerc-drive-mcp) · [checkout local](./leclerc-drive-mcp/README.md) | Serveur et CLI web adossés à une session persistante isolée par utilisateur ; onboarding, catalogue, fiches et panier sécurisé ; publication GitHub sur `main`, release `v0.1.1`. |
+| Leclerc Drive MCP | [GitHub](https://github.com/ncleton-petitmaker/leclerc-drive-mcp) | Serveur et CLI web adossés à une session persistante isolée par utilisateur ; onboarding, catalogue, fiches et panier sécurisé ; publication GitHub sur `main`, release `v0.1.1`. |
 | OVS MCP | [GitHub](https://github.com/ncleton-petitmaker/ovs-mcp) · [checkout local](./ovs-mcp/README.md) | Serveur et CLI Official Vegan Shop ; clone de travail géré ici sur `main`. |
 | Freepik MCP Alpic | [GitHub](https://github.com/ncleton-petitmaker/freepik-mcp-alpic) | Serveur MCP Python détenu par l’organisation. |
 | Freepik MCP | [GitHub](https://github.com/ncleton-petitmaker/freepik-mcp) | Fork du serveur Freepik : maintenir séparément de l’amont et documenter toute divergence. |
