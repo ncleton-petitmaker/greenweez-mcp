@@ -197,7 +197,19 @@ export class CamoufoxGateway {
         }
         await this.importPortableSessionIfPresent();
         const tabId = await this.navigateSharedTab(url);
-        return await this.evaluate(tabId, expression);
+        try {
+            return await this.evaluate(tabId, expression);
+        }
+        catch (error) {
+            // La fenêtre partagée peut être fermée à la main entre la navigation et
+            // l'extraction : on recrée l'onglet et on rejoue une fois au lieu de
+            // faire échouer toute la liste de courses.
+            if (!/has been closed|Tab not found/i.test(error instanceof Error ? error.message : String(error)))
+                throw error;
+            this.sharedTabId = undefined;
+            const retryTabId = await this.navigateSharedTab(url);
+            return await this.evaluate(retryTabId, expression);
+        }
     }
     async mutate(url, expression) {
         return this.read(url, expression);
