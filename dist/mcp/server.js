@@ -45,8 +45,13 @@ export function createServer(browser = new CamoufoxGateway(), confirmations = ne
             return error(cause);
         }
     });
-    server.server.onclose = () => { if (onboarding)
-        void onboarding.close().catch(() => undefined); };
+    server.server.onclose = () => {
+        if (onboarding)
+            void onboarding.close().catch(() => undefined);
+        if ("closeSharedTab" in browser && typeof browser.closeSharedTab === "function") {
+            void browser.closeSharedTab().catch(() => undefined);
+        }
+    };
     server.registerTool("search_products", {
         title: "Rechercher des produits Greenweez",
         description: "Recherche publique dans le catalogue Greenweez et retourne une page de produits avec les prix observés.",

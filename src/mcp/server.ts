@@ -45,7 +45,12 @@ export function createServer(browser: BrowserGateway = new CamoufoxGateway(), co
       return result(await onboarding.begin());
     } catch (cause) { return error(cause); }
   });
-  server.server.onclose = () => { if (onboarding) void onboarding.close().catch(() => undefined); };
+  server.server.onclose = () => {
+    if (onboarding) void onboarding.close().catch(() => undefined);
+    if ("closeSharedTab" in browser && typeof (browser as { closeSharedTab?: () => Promise<void> }).closeSharedTab === "function") {
+      void (browser as { closeSharedTab: () => Promise<void> }).closeSharedTab().catch(() => undefined);
+    }
+  };
   server.registerTool("search_products", {
     title: "Rechercher des produits Greenweez",
     description: "Recherche publique dans le catalogue Greenweez et retourne une page de produits avec les prix observés.",

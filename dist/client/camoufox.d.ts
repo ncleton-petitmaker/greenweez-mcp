@@ -9,6 +9,7 @@ export declare class CamoufoxGateway implements BrowserGateway, GreenweezOnboard
     private readonly userId;
     private readonly environment;
     private sessionImportAttempted;
+    private sharedTabId;
     constructor(environment?: NodeJS.ProcessEnv);
     private requestValue;
     private request;
@@ -34,6 +35,8 @@ export declare class CamoufoxGateway implements BrowserGateway, GreenweezOnboard
         connected: boolean;
         portableBundle: boolean;
     }>;
+    private navigateSharedTab;
+    closeSharedTab(): Promise<void>;
     read(url: URL, expression: string): Promise<unknown>;
     mutate(url: URL, expression: string): Promise<unknown>;
 }

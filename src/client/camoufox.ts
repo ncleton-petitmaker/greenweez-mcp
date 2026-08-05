@@ -33,6 +33,7 @@ export class CamoufoxGateway implements BrowserGateway, GreenweezOnboardingGatew
   private readonly userId: string;
   private readonly environment: NodeJS.ProcessEnv;
   private sessionImportAttempted = false;
+  private sharedTabId: string | undefined;
 
   constructor(environment: NodeJS.ProcessEnv = process.env) {
     this.environment = environment;
@@ -156,18 +157,40 @@ export class CamoufoxGateway implements BrowserGateway, GreenweezOnboardingGatew
     } finally { await this.close(tabId); }
   }
 
+  // Les lectures publiques réutilisent un seul onglet navigué de page en
+  // page : ouvrir puis fermer un onglet à chaque recherche faisait clignoter
+  // une fenêtre par opération et multipliait les chargements à froid.
+  private async navigateSharedTab(url: URL): Promise<string> {
+    if (this.sharedTabId) {
+      const tabId = this.sharedTabId;
+      try {
+        await this.request(`/tabs/${encodeURIComponent(tabId)}/navigate`, { method: "POST", body: JSON.stringify({ userId: this.userId, url: url.toString() }) });
+        await this.request(`/tabs/${encodeURIComponent(tabId)}/wait`, { method: "POST", body: JSON.stringify({ userId: this.userId, timeout: 30_000, waitForNetwork: true }) });
+        return tabId;
+      } catch {
+        // L'onglet partagé a pu être fermé hors du connecteur : on le recrée
+        // une fois au lieu d'échouer définitivement.
+        this.sharedTabId = undefined;
+      }
+    }
+    this.sharedTabId = await this.open(url);
+    return this.sharedTabId;
+  }
+
+  async closeSharedTab(): Promise<void> {
+    if (!this.sharedTabId) return;
+    const tabId = this.sharedTabId;
+    this.sharedTabId = undefined;
+    await this.close(tabId);
+  }
+
   async read(url: URL, expression: string): Promise<unknown> {
     if (url.origin !== "https://www.greenweez.com") {
       throw new ConfigurationError("Le connecteur a refusé une origine non Greenweez.", "Utilisez uniquement les outils publics Greenweez fournis par ce MCP.");
     }
     await this.importPortableSessionIfPresent();
-    let tabId: string | undefined;
-    try {
-      tabId = await this.open(url);
-      return await this.evaluate(tabId, expression);
-    } finally {
-      if (tabId) await this.close(tabId);
-    }
+    const tabId = await this.navigateSharedTab(url);
+    return await this.evaluate(tabId, expression);
   }
 
   async mutate(url: URL, expression: string): Promise<unknown> {

@@ -25,6 +25,7 @@ export class CamoufoxGateway {
     userId;
     environment;
     sessionImportAttempted = false;
+    sharedTabId;
     constructor(environment = process.env) {
         this.environment = environment;
         this.origin = requireLocalOrigin(environment.GREENWEEZ_CAMOFOX_URL ?? "http://127.0.0.1:9377");
@@ -160,20 +161,40 @@ export class CamoufoxGateway {
             await this.close(tabId);
         }
     }
+    // Les lectures publiques réutilisent un seul onglet navigué de page en
+    // page : ouvrir puis fermer un onglet à chaque recherche faisait clignoter
+    // une fenêtre par opération et multipliait les chargements à froid.
+    async navigateSharedTab(url) {
+        if (this.sharedTabId) {
+            const tabId = this.sharedTabId;
+            try {
+                await this.request(`/tabs/${encodeURIComponent(tabId)}/navigate`, { method: "POST", body: JSON.stringify({ userId: this.userId, url: url.toString() }) });
+                await this.request(`/tabs/${encodeURIComponent(tabId)}/wait`, { method: "POST", body: JSON.stringify({ userId: this.userId, timeout: 30_000, waitForNetwork: true }) });
+                return tabId;
+            }
+            catch {
+                // L'onglet partagé a pu être fermé hors du connecteur : on le recrée
+                // une fois au lieu d'échouer définitivement.
+                this.sharedTabId = undefined;
+            }
+        }
+        this.sharedTabId = await this.open(url);
+        return this.sharedTabId;
+    }
+    async closeSharedTab() {
+        if (!this.sharedTabId)
+            return;
+        const tabId = this.sharedTabId;
+        this.sharedTabId = undefined;
+        await this.close(tabId);
+    }
     async read(url, expression) {
         if (url.origin !== "https://www.greenweez.com") {
             throw new ConfigurationError("Le connecteur a refusé une origine non Greenweez.", "Utilisez uniquement les outils publics Greenweez fournis par ce MCP.");
         }
         await this.importPortableSessionIfPresent();
-        let tabId;
-        try {
-            tabId = await this.open(url);
-            return await this.evaluate(tabId, expression);
-        }
-        finally {
-            if (tabId)
-                await this.close(tabId);
-        }
+        const tabId = await this.navigateSharedTab(url);
+        return await this.evaluate(tabId, expression);
     }
     async mutate(url, expression) {
         return this.read(url, expression);
