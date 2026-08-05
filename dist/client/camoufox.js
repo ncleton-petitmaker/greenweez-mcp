@@ -177,8 +177,11 @@ export class CamoufoxGateway {
             }
             catch {
                 // L'onglet partagé a pu être fermé hors du connecteur : on le recrée
-                // une fois au lieu d'échouer définitivement.
+                // une fois au lieu d'échouer définitivement. L'ancien onglet est
+                // toujours libéré côté service, sinon la session atteint son plafond
+                // d'onglets (« Maximum tabs per session reached »).
                 this.sharedTabId = undefined;
+                await this.close(tabId);
             }
         }
         this.sharedTabId = await this.open(url);
@@ -207,6 +210,7 @@ export class CamoufoxGateway {
             if (!/has been closed|Tab not found/i.test(error instanceof Error ? error.message : String(error)))
                 throw error;
             this.sharedTabId = undefined;
+            await this.close(tabId);
             const retryTabId = await this.navigateSharedTab(url);
             return await this.evaluate(retryTabId, expression);
         }
