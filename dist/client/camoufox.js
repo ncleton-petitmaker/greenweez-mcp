@@ -40,7 +40,10 @@ export class CamoufoxGateway {
     }
     async requestValue(path, init = {}) {
         const controller = new AbortController();
-        const timeout = setTimeout(() => controller.abort(), 45_000);
+        // Un premier lancement de navigateur ou une page produit lente dépasse
+        // facilement 45 s : ce délai doit couvrir le pire démarrage à froid tout en
+        // restant sous les budgets des appelants (150 s côté adaptateur AgentVegan).
+        const timeout = setTimeout(() => controller.abort(), 120_000);
         timeout.unref();
         try {
             const response = await fetch(new URL(path, this.origin), {
