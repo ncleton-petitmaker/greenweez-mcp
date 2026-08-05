@@ -1,9 +1,16 @@
 {
   "name": "greenweez-mcp",
-  "version": "0.2.1",
+  "version": "0.2.2",
   "description": "Unofficial Greenweez MCP server and CLI with verified cart mutations.",
   "license": "MIT",
-  "keywords": ["mcp", "model-context-protocol", "greenweez", "shopping-cart", "groceries", "typescript"],
+  "keywords": [
+    "mcp",
+    "model-context-protocol",
+    "greenweez",
+    "shopping-cart",
+    "groceries",
+    "typescript"
+  ],
   "repository": {
     "type": "git",
     "url": "https://github.com/ncleton-petitmaker/greenweez-mcp.git"
@@ -29,7 +36,16 @@
     "greenweez-mcp": "dist/mcp/server.js",
     "greenweez": "dist/cli.js"
   },
-  "files": ["dist/cli.js", "dist/cli.d.ts", "dist/client", "dist/mcp", "dist/scripts", "README.md", "SECURITY.md", "LICENSE"],
+  "files": [
+    "dist/cli.js",
+    "dist/cli.d.ts",
+    "dist/client",
+    "dist/mcp",
+    "dist/scripts",
+    "README.md",
+    "SECURITY.md",
+    "LICENSE"
+  ],
   "scripts": {
     "build": "tsc -p tsconfig.json",
     "check": "tsc --noEmit -p tsconfig.json",
@@ -40,7 +56,9 @@
     "release:check": "node scripts/release-check.mjs",
     "verify": "npm run check && npm test && npm run privacy:audit && npm run package:verify"
   },
-  "engines": { "node": ">=22.12.0" },
+  "engines": {
+    "node": ">=22.12.0"
+  },
   "dependencies": {
     "@modelcontextprotocol/sdk": "1.30.0",
     "zod": "4.4.3"
